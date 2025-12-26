@@ -1,0 +1,52 @@
+{
+    "name": "Workflow 02 - Video Publisher",
+    "nodes": [
+          {
+                  "parameters": {
+                            "action": "getDirectories",
+                            "path": "/finished-videos"
+                  },
+                  "name": "Get Finished Videos",
+                  "type": "n8n-nodes-base.googleDrive",
+                  "typeVersion": 2,
+                  "position": [250, 300]
+          },
+          {
+                  "parameters": {
+                            "model": "claude-3-5-sonnet-20241022",
+                            "messages": "={{JSON.stringify({role: 'user', content: 'Generate YouTube title, description, and tags for video: ' + $node[\"Get Finished Videos\"].json.name})}}"
+                  },
+                  "name": "Generate Metadata",
+                  "type": "n8n-nodes-base.anthropic",
+                  "typeVersion": 1,
+                  "position": [450, 300]
+          },
+          {
+                  "parameters": {
+                            "resource": "video",
+                            "action": "upload",
+                            "title": "={{$node[\"Generate Metadata\"].json.title}}",
+                            "description": "={{$node[\"Generate Metadata\"].json.description}}",
+                            "tags": "={{$node[\"Generate Metadata\"].json.tags}}",
+                            "madeForKids": false,
+                            "privacyStatus": "public"
+                  },
+                  "name": "Publish to YouTube",
+                  "type": "n8n-nodes-base.youtube",
+                  "typeVersion": 1,
+                  "position": [650, 300]
+          },
+          {
+                  "parameters": {
+                            "action": "create",
+                            "fileName": "published_video_details.json",
+                            "fileContent": "={{JSON.stringify({videoId: $node[\"Publish to YouTube\"].json.id, url: 'https://youtu.be/' + $node[\"Publish to YouTube\"].json.id})}}"
+                  },
+                  "name": "Save Publication Details",
+                  "type": "n8n-nodes-base.googleDrive",
+                  "typeVersion": 2,
+                  "position": [850, 300]
+          }
+    ],
+    "connections": {}
+}
