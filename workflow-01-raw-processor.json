@@ -1,0 +1,48 @@
+{
+    "name": "Workflow 01 - Raw Video Processor",
+    "nodes": [
+          {
+                  "parameters": {
+                            "action": "getDirectories",
+                            "path": "/videos"
+                  },
+                  "name": "Get Raw Videos",
+                  "type": "n8n-nodes-base.googleDrive",
+                  "typeVersion": 2,
+                  "position": [250, 300]
+          },
+          {
+                  "parameters": {
+                            "resource": "transcription",
+                            "action": "create",
+                            "audioUrl": "={{$node[\"Get Raw Videos\"].json.downloadUrl}}"
+                  },
+                  "name": "YouTube Transcription",
+                  "type": "n8n-nodes-base.youtube",
+                  "typeVersion": 1,
+                  "position": [450, 300]
+          },
+          {
+                  "parameters": {
+                            "model": "claude-3-5-sonnet-20241022",
+                            "messages": "={{JSON.stringify({role: 'user', content: 'Provide editing instructions for: ' + $node[\"YouTube Transcription\"].json.transcript})}}"
+                  },
+                  "name": "Claude AI Editor",
+                  "type": "n8n-nodes-base.anthropic",
+                  "typeVersion": 1,
+                  "position": [650, 300]
+          },
+          {
+                  "parameters": {
+                            "action": "create",
+                            "fileName": "editing_instructions.json",
+                            "fileContent": "={{$node[\"Claude AI Editor\"].json.content}}"
+                  },
+                  "name": "Save to Google Drive",
+                  "type": "n8n-nodes-base.googleDrive",
+                  "typeVersion": 2,
+                  "position": [850, 300]
+          }
+    ],
+    "connections": {}
+}
