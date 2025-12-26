@@ -1,0 +1,10 @@
+credentials
+secrets
+*.env
+api-key
+/transcripts/
+/videos/
+*.mp4
+*.log
+node_modules/
+.DS_Store
